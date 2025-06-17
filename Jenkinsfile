@@ -1,10 +1,5 @@
 pipeline {
-    agent {
-        docker {
-            image 'maven:3.8.5-openjdk-17'
-            args '-v /var/run/docker.sock:/var/run/docker.sock'
-        }
-    }
+    agent any
 
     environment {
         DOCKERHUB_USERNAME = 'raihanfadhlal'
@@ -28,7 +23,7 @@ pipeline {
 
         stage('Build Spring Boot App') {
             steps {
-                sh './mvnw clean package -DskipTests'
+                sh 'docker run --rm -v $PWD:/app -w /app maven:3.8.5-openjdk-17 ./mvnw clean package -DskipTests'
             }
         }
 
@@ -47,11 +42,9 @@ pipeline {
 
         stage('Deploy to Kubernetes') {
             steps {
-                script {
-                    sh "sed -i 's|image: .*|image: ${DOCKER_IMAGE_NAME}:${DOCKER_IMAGE_TAG}|' k8s/deployment.yaml"
-                    sh 'kubectl apply -f k8s/'
-                    sh 'kubectl rollout status deployment/simple-api-deployment'
-                }
+                sh "sed -i 's|image: .*|image: ${DOCKER_IMAGE_NAME}:${DOCKER_IMAGE_TAG}|' k8s/deployment.yaml"
+                sh 'kubectl apply -f k8s/'
+                sh 'kubectl rollout status deployment/simple-api-deployment'
             }
         }
     }
