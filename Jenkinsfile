@@ -1,17 +1,12 @@
 pipeline {
-    agent {
-        dockerfile {
-            filename 'Dockerfile.agent'
-            args '-v /var/run/docker.sock:/var/run/docker.sock -v ${HOME}/.kube:/home/jenkins/.kube'
-        }
-    }
+    agent any
 
     environment {
         DOCKERHUB_USERNAME = 'raihanfadhlal'
         DOCKER_IMAGE_NAME = "${DOCKERHUB_USERNAME}/simple-api"
         DOCKER_IMAGE_TAG = "1.${BUILD_NUMBER}"
         DOCKERHUB_CREDENTIALS_ID = 'dockerhub-credentials'
-        KUBECONFIG = '/home/jenkins/.kube/config'
+        KUBECONFIG = '/root/.kube/config'
     }
 
     stages {
